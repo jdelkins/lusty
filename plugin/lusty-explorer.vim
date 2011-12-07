@@ -282,7 +282,8 @@ endif
 
 " Vim-to-ruby function calls.
 function! s:LustyFilesystemExplorerStart(path)
-  exec "ruby LustyE::profile() { $lusty_filesystem_explorer.run_from_path('".a:path."') }"
+  ruby a_path = VIM::evaluate("a:path")
+  ruby LustyE::profile() { $lusty_filesystem_explorer.run_from_path(a_path) }
 endfunction
 
 function! s:LustyBufferExplorerStart()
@@ -1305,7 +1306,8 @@ class FilesystemExplorer < Explorer
       LustyE::assert($curwin == @calling_window)
       # Escape slashes, open square braces, spaces, sharps, double quotes and
       # percent signs, and remove leading ./ for files in pwd.
-      filename_escaped = VIM::evaluate("fnameescape('#{path_str}')").sub(/^\.\//,"")
+      single_quote_escaped = VIM::single_quote_escape(path_str)
+      filename_escaped = VIM::evaluate("fnameescape('#{single_quote_escaped}')").sub(/^\.\//,"")
       single_quote_escaped = VIM::single_quote_escape(filename_escaped)
       sanitized = VIM::evaluate "fnamemodify('#{single_quote_escaped}', ':.')"
       cmd = case open_mode
