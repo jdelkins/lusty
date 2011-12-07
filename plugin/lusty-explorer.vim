@@ -1234,23 +1234,23 @@ class FilesystemExplorer < Explorer
           view_str << File::SEPARATOR
         end
 
-	begin
-	  Dir.foreach(view_str) do |name|
-	    next if name == "."   # Skip pwd
-	    next if name == ".." and LustyE::option_set?("AlwaysShowDotFiles")
+        begin
+          Dir.foreach(view_str) do |name|
+            next if name == "."   # Skip pwd
+            next if name == ".." and LustyE::option_set?("AlwaysShowDotFiles")
 
-	    # Hide masked files.
-	    next if FileMasks.masked?(name)
+            # Hide masked files.
+            next if FileMasks.masked?(name)
 
-	    if FileTest.directory?(view_str + name)
-	      name << File::SEPARATOR
-	    end
-	    entries << FilesystemEntry.new(name)
-	  end
-	rescue Errno::EACCES
-	  # TODO: show "-- PERMISSION DENIED --"
-	  return []
-	end
+            if FileTest.directory?(view_str + name)
+              name << File::SEPARATOR
+            end
+            entries << FilesystemEntry.new(name)
+          end
+        rescue Errno::EACCES
+          # TODO: show "-- PERMISSION DENIED --"
+          return []
+        end
         @memoized_dir_contents[view] = entries
       end
 
