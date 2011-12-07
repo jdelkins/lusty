@@ -1234,18 +1234,23 @@ class FilesystemExplorer < Explorer
           view_str << File::SEPARATOR
         end
 
-        Dir.foreach(view_str) do |name|
-          next if name == "."   # Skip pwd
-          next if name == ".." and LustyE::option_set?("AlwaysShowDotFiles")
+	begin
+	  Dir.foreach(view_str) do |name|
+	    next if name == "."   # Skip pwd
+	    next if name == ".." and LustyE::option_set?("AlwaysShowDotFiles")
 
-          # Hide masked files.
-          next if FileMasks.masked?(name)
+	    # Hide masked files.
+	    next if FileMasks.masked?(name)
 
-          if FileTest.directory?(view_str + name)
-            name << File::SEPARATOR
-          end
-          entries << FilesystemEntry.new(name)
-        end
+	    if FileTest.directory?(view_str + name)
+	      name << File::SEPARATOR
+	    end
+	    entries << FilesystemEntry.new(name)
+	  end
+	rescue Errno::EACCES
+	  # TODO: show "-- PERMISSION DENIED --"
+	  return []
+	end
         @memoized_dir_contents[view] = entries
       end
 
@@ -1289,7 +1294,7 @@ class FilesystemExplorer < Explorer
     def open_entry(entry, open_mode)
       path = view_path() + entry.label
 
-      if File.directory?(path)
+      if File.directory?(path.to_s)
         # Recurse into the directory instead of opening it.
         @prompt.set!(path.to_s)
         @selected_index = 0
@@ -1304,9 +1309,7 @@ class FilesystemExplorer < Explorer
 
     def load_file(path_str, open_mode)
       LustyE::assert($curwin == @calling_window)
-      # Escape for Vim and remove leading ./ for files in pwd.
-      filename_escaped = VIM::filename_escape(path_str).sub(/^\.\//,"")
-      single_quote_escaped = VIM::single_quote_escape(filename_escaped)
+      single_quote_escaped = VIM::single_quote_escape(path_str)
       sanitized = VIM::evaluate "fnamemodify('#{single_quote_escaped}', ':.')"
       cmd = case open_mode
             when :current_tab
