@@ -412,7 +412,13 @@ module VIM
   def self.filename_escape(s)
     # Escape slashes, open square braces, spaces, sharps, double quotes and
     # percent signs.
-    s.gsub(/\\/, '\\\\\\').gsub(/[\[ #"%]/, '\\\\\0')
+
+    # If path appears Windows-like, don't do anything
+    if s[/^[a-zA-Z]:\\/] or s[/^\\\\/]
+      s
+    else
+      s.gsub(/\\/, '\\\\\\').gsub(/[\[ #"%]/, '\\\\\0')
+    end
   end
 
   def self.regex_escape(s)
@@ -1309,7 +1315,9 @@ class FilesystemExplorer < Explorer
 
     def load_file(path_str, open_mode)
       LustyE::assert($curwin == @calling_window)
-      single_quote_escaped = VIM::single_quote_escape(path_str)
+      # Escape for Vim and remove leading ./ for files in pwd.
+      filename_escaped = VIM::filename_escape(path_str).sub(/^\.\//,"")
+      single_quote_escaped = VIM::single_quote_escape(filename_escaped)
       sanitized = VIM::evaluate "fnamemodify('#{single_quote_escaped}', ':.')"
       cmd = case open_mode
             when :current_tab
