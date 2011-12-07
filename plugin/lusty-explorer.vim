@@ -412,13 +412,7 @@ module VIM
   def self.filename_escape(s)
     # Escape slashes, open square braces, spaces, sharps, double quotes and
     # percent signs.
-
-    # If path appears Windows-like, don't do anything
-    if s[/^[a-zA-Z]:\\/] or s[/^\\\\/]
-      s
-    else
-      s.gsub(/\\/, '\\\\\\').gsub(/[\[ #"%]/, '\\\\\0')
-    end
+    VIM::evaluate("fnameescape('#{s}')")
   end
 
   def self.regex_escape(s)
