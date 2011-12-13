@@ -17,7 +17,7 @@
 "               Brett DiFrischia, Ali Asad Lotia, Kenneth Love, Ben Boeckel,
 "               robquant, lilydjwg, Martin Wache, Johannes Holzfuß
 "               Donald Curtis, Jan Zwiener, Giuseppe Rota, Toby O'Connell,
-"               Göran Gustafsson
+"               Göran Gustafsson, Joel Elkins
 "
 " Release Date: November 25, 2011
 "      Version: 4.2
@@ -282,8 +282,9 @@ endif
 
 " Vim-to-ruby function calls.
 function! s:LustyFilesystemExplorerStart(path)
-  ruby a_path = VIM::evaluate("a:path")
-  ruby LustyE::profile() { $lusty_filesystem_explorer.run_from_path(a_path) }
+  ruby LustyE::profile() {
+       \  $lusty_filesystem_explorer.run_from_path(VIM::evaluate("a:path"))
+       \}
 endfunction
 
 function! s:LustyBufferExplorerStart()
